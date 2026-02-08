@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" shutdownHook="disable">
+    
+    <!-- Shared log pattern -->
+    <Properties>
+        
+        <Property name="LOG_PATTERN">
+            [%d{yyyy-MM-dd HH:mm:ss.SSS}] [%t] [%level] [%logger{1}.%M] - %msg%n
+        </Property>
+    
+    </Properties>
+    
+    <Appenders>
+        
+        <!-- Console logging for local visibility -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}" />
+            <Filters>
+                <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY" />
+            </Filters>
+        </Console>
+        
+        <!-- Rolling file for persistent application logs -->
+        <RollingFile name="File" fileName="logs/app.log" filePattern="logs/%d{yyyy-MM}/app-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}" />
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+                <SizeBasedTriggeringPolicy size="2MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="30" />
+        </RollingFile>
+        
+        <!-- Async wrapper to avoid I/O blocking -->
+        <Async name="AsyncFile">
+            <AppenderRef ref="File" />
+        </Async>
+    
+    </Appenders>
+    
+    <Loggers>
+        
+        <!-- Application package with debug logging -->
+        <Logger name="com.nsbt" level="debug" additivity="false">
+            <AppenderRef ref="AsyncFile" />
+        </Logger>
+        
+        <!-- Root logger for framework and container logs -->
+        <Root level="info">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="AsyncFile" />
+        </Root>
+    
+    </Loggers>
+
+</Configuration>
